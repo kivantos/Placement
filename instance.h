@@ -27,14 +27,18 @@ public:
    
 private:
    void find_perimeter_for_all_permutations(std::vector<size_t> & pi, 
+                                            std::vector<size_t> & pi_inverse, 
                                             std::vector<size_t> & sigma, 
+                                            std::vector<size_t> & sigma_inverse, 
                                             std::vector<size_t> & free_indices, 
                                             std::vector<std::pair<x_coord, y_coord> > & placement,
                                             size_t idx,
                                             bool pi_or_sigma);
    
-   bool placement_for_pi_sigma(std::vector<size_t> const & pi, 
+   long int placement_for_pi_sigma(std::vector<size_t> const & pi, 
+                               std::vector<size_t> const & pi_inverse, 
                                std::vector<size_t> const & sigma, 
+                               std::vector<size_t> const & sigma_inverse, 
                                std::vector<std::pair<x_coord, y_coord> > & placement);
    
    unsigned int      _num_cells;
@@ -42,6 +46,8 @@ private:
    
    std::vector<std::pair<x_coord, y_coord> > _best_placement;
    long int          _best_perimeter;
+   long int          _total_cell_size;
+   std::map<size_t, long int> Q;
 };
 
 #endif
