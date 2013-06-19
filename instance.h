@@ -1,0 +1,47 @@
+#ifndef INSTANCE_H
+#define INSTANCE_H
+
+
+typedef long int x_coord;
+typedef long int y_coord;
+
+class Cell
+{
+public:
+   long int height;
+   long int width;
+};
+
+
+class Instance
+{
+public:
+   
+   void read_file(char const * filename);
+   
+   void minimum_perimeter();
+   
+   
+   //DEBUG FUNCTIONS
+   void print();
+   
+private:
+   void find_perimeter_for_all_permutations(std::vector<size_t> & pi, 
+                                            std::vector<size_t> & sigma, 
+                                            std::vector<size_t> & free_indices, 
+                                            std::vector<std::pair<x_coord, y_coord> > & placement,
+                                            size_t idx,
+                                            bool pi_or_sigma);
+   
+   bool placement_for_pi_sigma(std::vector<size_t> const & pi, 
+                               std::vector<size_t> const & sigma, 
+                               std::vector<std::pair<x_coord, y_coord> > & placement);
+   
+   unsigned int      _num_cells;
+   std::vector<Cell> _cells;
+   
+   std::vector<std::pair<x_coord, y_coord> > _best_placement;
+   long int          _best_perimeter;
+};
+
+#endif
