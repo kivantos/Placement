@@ -3,7 +3,8 @@
 
 class Graph
 {
-   
+public:
+   void print();
 };
 
 
