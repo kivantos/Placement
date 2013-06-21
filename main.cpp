@@ -3,6 +3,8 @@
  * Date: June 2013
  * 
  * Calculating a Placement
+ * 
+ * 
  **/
 
 #include <iostream>
