@@ -41,7 +41,7 @@ private:
                                std::vector<size_t> const & sigma_inverse, 
                                std::vector<std::pair<x_coord, y_coord> > & placement);
    
-   unsigned int      _num_cells;
+   unsigned int      _num_cells; //Dimension
    std::vector<Cell> _cells;
    
    std::vector<std::pair<x_coord, y_coord> > _best_placement;
