@@ -19,6 +19,9 @@ public:
    
    void read_file(char const * filename);
    
+   /**Finds a placement minimizing the bounding box.
+    * Output the placement to the standard output.
+    **/
    void minimum_perimeter();
    
    
