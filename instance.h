@@ -39,8 +39,11 @@ private:
     * to the permutations pi and sigma is determined.
     * The current best perimeter during the calculation is stored
     * at best_perimeter. The current best placement is stored in the vector best_placement.
+    *
+    * Return true if an optimum placement is found. Recursion can be stopped.
+    * Return false if an optimum placement has not yet been found.
     **/
-   void find_perimeter_for_all_permutations(std::vector<size_t> & pi,
+   bool find_perimeter_for_all_permutations(std::vector<size_t> & pi,
                                             std::vector<size_t> & pi_inverse,
                                             std::vector<size_t> & free_indices_pi,
                                             std::vector<size_t> & sigma,
@@ -54,11 +57,18 @@ private:
                                             bool pi_or_sigma);
 
 
-   long int placement_for_pi_sigma(std::vector<size_t> const & pi,
+   /**Finds an optimal placement corresponding to the permutations pi and sigma.
+    * Return true if this placement has overall optimum perimeter.
+    * Return false otherwise.
+    **/
+   bool placement_for_pi_sigma(std::vector<size_t> const & pi,
                                std::vector<size_t> const & pi_inverse,
                                std::vector<size_t> const & sigma,
                                std::vector<size_t> const & sigma_inverse,
-                               std::vector<std::pair<x_coord, y_coord> > & placement);
+                               std::vector<std::pair<x_coord, y_coord> > & placement,
+                               std::vector<std::pair<x_coord, y_coord> > & best_placement,
+                               long int & best_perimeter,
+                               std::map<size_t, long int> & Q);
 
    unsigned int      _num_cells;        //Dimension
    long int          _total_cell_size;  //Sum of all cell sizes.

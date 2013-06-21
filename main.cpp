@@ -2,8 +2,10 @@
  * Authors: Christoph Hunkenschröder, Rasmus Schroeder
  * Date: June 2013
  *
- * Calculating a Placement.
- *
+ * Programme description:
+ * The programme calculates for a given list of cells with widths and heights
+ * a placement minimizing the bounding box length.
+ * The placement is written to the standard output.
  *
  **/
 
@@ -25,8 +27,8 @@ int main(int argc, char **argv)
 
    Instance Inst;
    Inst.read_file(argv[1]);
+   //Inst.print();
    Inst.minimum_perimeter();
 
-   Inst.print();
    return 0;
 }
