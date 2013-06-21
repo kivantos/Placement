@@ -26,6 +26,8 @@ public:
    
    
    //DEBUG FUNCTIONS
+   /**Prints Instance information.
+    **/
    void print();
    
 private:
