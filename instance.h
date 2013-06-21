@@ -48,7 +48,7 @@ private:
    
    unsigned int      _num_cells; //Dimension
    std::vector<Cell> _cells;
-   
+
    std::vector<std::pair<x_coord, y_coord> > _best_placement;
    long int          _best_perimeter;
    long int          _total_cell_size;
