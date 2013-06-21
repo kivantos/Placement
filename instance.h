@@ -46,12 +46,16 @@ private:
    bool find_perimeter_for_all_permutations(std::vector<size_t> & pi,
                                             std::vector<size_t> & pi_inverse,
                                             std::vector<size_t> & free_indices_pi,
+                                            std::vector<size_t> & best_pi,
                                             std::vector<size_t> & sigma,
                                             std::vector<size_t> & sigma_inverse,
                                             std::vector<size_t> & free_indices_sigma,
+                                            std::vector<size_t> & best_sigma,
                                             std::vector<std::pair<x_coord, y_coord> > & placement,
                                             std::vector<std::pair<x_coord, y_coord> > & best_placement,
                                             long int & best_perimeter,
+                                            long int & lower_bound_perimeter,
+                                            size_t k,
                                             std::map<size_t, long int> & Q,
                                             size_t idx,
                                             bool pi_or_sigma);
@@ -63,12 +67,34 @@ private:
     **/
    bool placement_for_pi_sigma(std::vector<size_t> const & pi,
                                std::vector<size_t> const & pi_inverse,
+                               std::vector<size_t> & best_pi,
                                std::vector<size_t> const & sigma,
                                std::vector<size_t> const & sigma_inverse,
+                               std::vector<size_t> & best_sigma,
                                std::vector<std::pair<x_coord, y_coord> > & placement,
                                std::vector<std::pair<x_coord, y_coord> > & best_placement,
                                long int & best_perimeter,
+                               long int & lower_bound_perimeter,
+                               size_t k,
                                std::map<size_t, long int> & Q);
+
+   /**Finds an optimal placement using all permutations which arise from using
+    * pi and sigma, and inserting the value k at all possible positions.
+    * Return true if an overall optimum placement was found.
+    * Return false otherwise.
+    **/
+   bool find_placement_one_free_cell(std::vector<size_t> const & pi,
+                                     std::vector<size_t> & best_pi,
+                                     std::vector<size_t> const & sigma,
+                                     std::vector<size_t> & best_sigma,
+                                     std::vector<std::pair<x_coord, y_coord> > & placement,
+                                     std::vector<std::pair<x_coord, y_coord> > & best_placement,
+                                     long int & best_perimeter,
+                                     long int & lower_bound_perimeter,
+                                     size_t k,
+                                     std::map<size_t, long int> & Q);
+
+
 
    unsigned int      _num_cells;        //Dimension
    long int          _total_cell_size;  //Sum of all cell sizes.

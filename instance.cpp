@@ -54,46 +54,96 @@ void Instance::minimum_perimeter()
    vector<size_t>                  pi;                 //Permutation pi
    vector<size_t>                  pi_inverse;         //Inverse of permutation pi
    vector<size_t>                  free_indices_pi;    //Uninitialized indices of pi
+   vector<size_t>                  best_pi;            //Permutation with best result
+   vector<size_t>                  old_pi;
    vector<size_t>                  sigma;              //Permutation sigma
    vector<size_t>                  sigma_inverse;      //Inverse of permutation sigma
    vector<size_t>                  free_indices_sigma; //Uninitialized indices of sigma
+   vector<size_t>                  best_sigma;         //Permutation with best result
+   vector<size_t>                  old_sigma;
    vector<pair<x_coord, y_coord> > placement;          //Coordinates of the cells in a placement
    vector<pair<x_coord, y_coord> > best_placement;     //Coordinates of current best placement
    map<size_t, long int>           Q;                  //Priority queue needed for the placement alg.
-   long int best_perimeter = INT_MAX;                  //Current best perimeter of placement
+   long int best_perimeter = INT_MAX;                  //Current best perimeter of placement;
+   long int lower_bound_perimeter = 0;
 
 
    //Reserve memory for all vectors.
    //We only allocate memory once for every vector.
    pi.resize(_num_cells);
    pi_inverse.resize(_num_cells);
+   free_indices_pi.resize(_num_cells);
+   best_pi.resize(_num_cells);
+   old_pi.resize(_num_cells);
+
    sigma.resize(_num_cells);
    sigma_inverse.resize(_num_cells);
+   free_indices_sigma.resize(_num_cells);
+   best_sigma.resize(_num_cells);
+   old_sigma.resize(_num_cells);
+
    placement.resize(_num_cells);
    best_placement.resize(_num_cells);
 
 
-   //At the beginning, all indices of pi and sigma are uninitialized.
-   for (size_t i = 0; i<_num_cells; i++)
+
+   for (size_t k = 1; k <= _num_cells; k++)
    {
-      free_indices_pi.push_back(i);
-      free_indices_sigma.push_back(i);
+      //At the beginning, all indices of pi and sigma are uninitialized.
+      for (size_t i = 0; i<k; i++)
+      {
+         free_indices_pi[i] = i;
+         free_indices_sigma[i] = i;
+         if (i!=k-1) old_pi[i] = best_pi[i];
+         if (i!=k-1) old_sigma[i] = best_sigma[i];
+      }
+      best_perimeter = INT_MAX;
+
+      cout << "Calculate for k=" << k << "..." << endl;
+
+      bool success;
+      success = find_placement_one_free_cell(old_pi,
+                                             best_pi,
+                                             old_sigma,
+                                             best_sigma,
+                                             placement,
+                                             best_placement,
+                                             best_perimeter,
+                                             lower_bound_perimeter,
+                                             k,
+                                             Q);
+
+      if (!success)
+      {
+         find_perimeter_for_all_permutations(pi,
+                                             pi_inverse,
+                                             free_indices_pi,
+                                             best_pi,
+                                             sigma,
+                                             sigma_inverse,
+                                             free_indices_sigma,
+                                             best_sigma,
+                                             placement,
+                                             best_placement,
+                                             best_perimeter,
+                                             lower_bound_perimeter,
+                                             k,  //Number of cells we look at.
+                                             Q,
+                                             k,  //Index to be fixed first.
+                                             true);
+
+         lower_bound_perimeter = best_perimeter;
+      }
+      else
+      {
+         cout << "Could use old placement to insert one new cell!" << endl;
+      }
+
+      cout << "...done. Lower bound improved to " << lower_bound_perimeter << endl;
    }
 
-   find_perimeter_for_all_permutations(pi,
-                                       pi_inverse,
-                                       free_indices_pi,
-                                       sigma,
-                                       sigma_inverse,
-                                       free_indices_sigma,
-                                       placement,
-                                       best_placement,
-                                       best_perimeter,
-                                       Q,
-                                       _num_cells,  //Index to be fixed first.
-                                       true);
-
    //Output
+   //TODO: Correct format.
    cout << endl << "BBX=" << best_perimeter << endl;
    cout << "Placement:" << endl;
    for (size_t i = 0; i < _num_cells; i++)
@@ -107,12 +157,16 @@ void Instance::minimum_perimeter()
 bool Instance::find_perimeter_for_all_permutations(vector<size_t> & pi,
                                                    vector<size_t> & pi_inverse,
                                                    vector<size_t> & free_indices_pi,
+                                                   vector<size_t> & best_pi,
                                                    vector<size_t> & sigma,
                                                    vector<size_t> & sigma_inverse,
                                                    vector<size_t> & free_indices_sigma,
+                                                   vector<size_t> & best_sigma,
                                                    vector<pair<x_coord, y_coord> > & placement,
                                                    vector<pair<x_coord, y_coord> > & best_placement,
                                                    long int & best_perimeter,
+                                                   long int & lower_bound_perimeter,
+                                                   size_t k,
                                                    map<size_t, long int> & Q,
                                                    size_t idx,
                                                    bool pi_or_sigma)
@@ -130,15 +184,20 @@ bool Instance::find_perimeter_for_all_permutations(vector<size_t> & pi,
          pi_inverse[idx-1] = tmp;
          free_indices_pi[i] = free_indices_pi[idx - 1];
 
+
          found_optimum = find_perimeter_for_all_permutations(pi,
                                                             pi_inverse,
                                                             free_indices_pi,
+                                                            best_pi,
                                                             sigma,
                                                             sigma_inverse,
                                                             free_indices_sigma,
+                                                            best_sigma,
                                                             placement,
                                                             best_placement,
                                                             best_perimeter,
+                                                            lower_bound_perimeter,
+                                                            k,
                                                             Q,
                                                             idx-1,   //Index to be fixed next.
                                                             true);
@@ -154,14 +213,18 @@ bool Instance::find_perimeter_for_all_permutations(vector<size_t> & pi,
          found_optimum = find_perimeter_for_all_permutations(pi,
                                                             pi_inverse,
                                                             free_indices_pi,
+                                                            best_pi,
                                                             sigma,
                                                             sigma_inverse,
                                                             free_indices_sigma,
+                                                            best_sigma,
                                                             placement,
                                                             best_placement,
                                                             best_perimeter,
+                                                            lower_bound_perimeter,
+                                                            k,
                                                             Q,
-                                                            _num_cells,
+                                                            k,
                                                             false);
       }
    }
@@ -179,12 +242,16 @@ bool Instance::find_perimeter_for_all_permutations(vector<size_t> & pi,
          found_optimum = find_perimeter_for_all_permutations(pi,
                                                             pi_inverse,
                                                             free_indices_pi,
+                                                            best_pi,
                                                             sigma,
                                                             sigma_inverse,
                                                             free_indices_sigma,
+                                                            best_sigma,
                                                             placement,
                                                             best_placement,
                                                             best_perimeter,
+                                                            lower_bound_perimeter,
+                                                            k,
                                                             Q,
                                                             idx-1,
                                                             false);
@@ -197,11 +264,15 @@ bool Instance::find_perimeter_for_all_permutations(vector<size_t> & pi,
       {
          found_optimum = placement_for_pi_sigma(pi,
                                                 pi_inverse,
+                                                best_pi,
                                                 sigma,
                                                 sigma_inverse,
+                                                best_sigma,
                                                 placement,
                                                 best_placement,
                                                 best_perimeter,
+                                                lower_bound_perimeter,
+                                                k,
                                                 Q);
       }
    }
@@ -213,20 +284,24 @@ bool Instance::find_perimeter_for_all_permutations(vector<size_t> & pi,
 
 bool Instance::placement_for_pi_sigma(vector<size_t> const & pi,
                                       vector<size_t> const & pi_inverse,
+                                      vector<size_t> & best_pi,
                                       vector<size_t> const & sigma,
                                       vector<size_t> const & sigma_inverse,
+                                      vector<size_t> & best_sigma,
                                       vector<pair<x_coord, y_coord> > & placement,
                                       vector<pair<x_coord, y_coord> > & best_placement,
                                       long int & best_perimeter,
+                                      long int & lower_bound_perimeter,
+                                      size_t k,
                                       map<size_t, long int> & Q)
 {
    //Find x-coordinates
    long int total_width(0);
    Q.clear();
    Q[0] = 0;
-   Q[_num_cells + 1] = INT_MAX;
+   Q[k + 1] = INT_MAX;
 
-   for (size_t i = 0; i < _num_cells; i++)
+   for (size_t i = 0; i < k; i++)
    {
       size_t c = pi[i];
       size_t p = sigma_inverse[c];
@@ -256,8 +331,8 @@ bool Instance::placement_for_pi_sigma(vector<size_t> const & pi,
    long int total_height(0);
    Q.clear();
    Q[0] = 0;
-   Q[_num_cells + 1] = 100000; //TODO: INF
-   for (size_t i = _num_cells; i > 0;)
+   Q[k + 1] = INT_MAX;
+   for (size_t i = k; i > 0;)
    {
       i--;
       size_t c = sigma[i];
@@ -287,16 +362,97 @@ bool Instance::placement_for_pi_sigma(vector<size_t> const & pi,
    //The currently calculated placement is the best so far.
    //Store the values.
    best_perimeter = total_width + total_height;
-   for (size_t i = 0; i < _num_cells; i++)
+   for (size_t i = 0; i < k; i++)
    {
       best_placement[i].first  = placement[i].first;
       best_placement[i].second = placement[i].second;
+      best_pi[i] = pi[i];
+      best_sigma[i] = sigma[i];
    }
 
-   return false;
+   if (best_perimeter == lower_bound_perimeter) return true;  //Optimum placement found.
+   else return false;
+}
 
-   //TODO: One can check whether the found solution is globally the best possible.
-   //In that case, return true.
+
+bool Instance::find_placement_one_free_cell(vector< size_t > const & pi_old,
+                                            vector< size_t > & best_pi,
+                                            vector< size_t > const & sigma_old,
+                                            vector< size_t > & best_sigma,
+                                            vector< pair< x_coord, y_coord > >& placement,
+                                            vector< pair< x_coord, y_coord > >& best_placement,
+                                            long int& best_perimeter,
+                                            long int& lower_bound_perimeter,
+                                            size_t k,
+                                            std::map< size_t,
+                                            long int >& Q)
+{
+   if (k <= 1) return false;
+
+   bool found_optimum;
+   vector<size_t> pi;
+   vector<size_t> pi_inverse;
+   vector<size_t> sigma;
+   vector<size_t> sigma_inverse;
+
+   pi.resize(k);
+   pi_inverse.resize(k);
+   sigma.resize(k);
+   sigma_inverse.resize(k);
+
+   for (size_t i_pi = 0; i_pi < k; i_pi++)
+   {
+      for (size_t t = 0; t < k; t++)
+      {
+         if (t<i_pi)       pi[t] = pi_old[t];
+         else if (t==i_pi) pi[t] = k-1;
+         else if (t>i_pi)  pi[t] = pi_old[t-1];
+      }
+      for (size_t t = 0; t < k; t++)
+      {
+         pi_inverse[pi[t]] = t;
+      }
+
+      for (size_t i_sigma = 0; i_sigma < k; i_sigma++)
+      {
+         for (size_t t = 0; t < k; t++)
+         {
+            if (t<i_sigma)       sigma[t] = sigma_old[t];
+            else if (t==i_sigma) sigma[t] = k-1;
+            else if (t>i_sigma)  sigma[t] = sigma_old[t-1];
+         }
+         for (size_t t = 0; t < k; t++)
+         {
+            sigma_inverse[sigma[t]] = t;
+         }
+
+//          cout << "pi old: ";
+//          for (size_t t = 0; t < k-1; t++) cout << pi_old[t] << " ";
+//          cout << endl << "pi new: ";
+//          for (size_t t = 0; t < k; t++) cout << pi[t] << " ";
+//          cout << endl << "sigma old: ";
+//          for (size_t t = 0; t < k-1; t++) cout << sigma_old[t] << " ";
+//          cout << endl << "sigma new: ";
+//          for (size_t t = 0; t < k; t++) cout << sigma[t] << " ";
+//          cout << endl << endl;
+
+         found_optimum = placement_for_pi_sigma(pi,
+                                                pi_inverse,
+                                                best_pi,
+                                                sigma,
+                                                sigma_inverse,
+                                                best_sigma,
+                                                placement,
+                                                best_placement,
+                                                best_perimeter,
+                                                lower_bound_perimeter,
+                                                k,
+                                                Q);
+
+         if (found_optimum) return true;  //Optimum placement found!
+      }
+   }
+   return false;
 }
 
 

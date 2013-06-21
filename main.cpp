@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 
    Instance Inst;
    Inst.read_file(argv[1]);
-   //Inst.print();
+   Inst.print();
    Inst.minimum_perimeter();
 
    return 0;
