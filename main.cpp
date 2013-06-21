@@ -1,3 +1,8 @@
+/**
+ * Authors: Christoph Hunkenschröder, Rasmus Schroeder
+ * Date: June 2013
+ **/
+
 #include <iostream>
 #include <vector>
 #include <map>
