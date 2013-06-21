@@ -2,7 +2,7 @@
  * Authors: Christoph Hunkenschröder, Rasmus Schroeder
  * Date: June 2013
  * 
- * Calculating a Placement
+ * Calculating a Placement.
  * 
  * 
  **/
