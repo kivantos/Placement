@@ -9,6 +9,166 @@
 
 using namespace std;
 
+/**This class is used as a priority queue.
+ * All elements of the queue have a key and a value.
+ * They are sorted by their key.
+ *
+ * There will always be at least two elements using the keys
+ * 0 and n+1, where n is the number of cells to place in the algorithm.
+ * The values are 0 respectively INT_MAX.
+ * All other elements will have keys inbetween 0 and n+1.
+ *
+ * Remark: We are aware of the fact that the current implementation
+ * may not satisfy the theoretical runtime. However, in practice
+ * this is much faster than using maps, since we do not need to
+ * allocate memery every time we insert elements.
+ * This will not be a good solution for large instances.
+ * But the implementation does not run in any realistic time on large
+ * instances anyway.
+ **/
+class Queue
+{
+public:
+   Queue(unsigned int size);
+
+   /**Set the value of the element which has key _key.
+    **/
+   void set_value(size_t _key, long int value);
+
+   /**Delete all elements but the first and the last.
+    **/
+   void reset();
+
+   /**Return the value of the element with largest key smaller than _key.
+    **/
+   long int val_of_pred(size_t _key);
+
+   /**Delete all elements which have a key greater than _key and
+    * value smaller than the value with key _key.
+    **/
+   void delete_smaller_succ(size_t _key);
+
+   /**Print the queue.
+    **/
+   void print();
+
+private:
+   vector<pair<size_t, long int> > _q;        //The queue
+   size_t                          _length;   //Length of queue for internal use only.
+};
+
+Queue::Queue(unsigned int size)
+{
+   _q.resize(size+2);
+   _q[0].first = 0;
+   _q[0].second = 0;
+   _q[1].first = size+1;
+   _q[1].second = INT_MAX;
+   _length = 2;
+}
+
+void Queue::set_value(size_t idx, long int value)
+{
+//    cout << "Set value" << endl;
+//    print();
+   size_t cur_idx = 1;
+   while (_q[cur_idx].first < idx)
+   {
+      cur_idx++;
+   }
+   for (size_t i = _length; i > cur_idx; i--)
+   {
+      _q[i].first = _q[i-1].first;
+      _q[i].second = _q[i-1].second;
+   }
+   _q[cur_idx].first = idx;
+   _q[cur_idx].second = value;
+   _length += 1;
+//    print();
+//    cout << endl;
+}
+
+void Queue::reset()
+{
+   _q[0].first = 0;
+   _q[0].second = 0;
+   _q[1].first = _q.size()-1;
+   _q[1].second = INT_MAX;
+   _length = 2;
+}
+
+
+long int Queue::val_of_pred(size_t idx)
+{
+   size_t cur_idx = 1;
+   while (_q[cur_idx].first < idx)
+   {
+      cur_idx++;
+   }
+   return _q[cur_idx-1].second;
+}
+
+void Queue::delete_smaller_succ(size_t idx)
+{
+   size_t cur_idx = 1;
+   while (_q[cur_idx].first < idx)
+   {
+      cur_idx++;
+   }
+   if (_q[cur_idx].first != idx)
+   {
+      cout << "FEHLER::::::" << endl;
+   }
+   if (cur_idx >= _length-1)
+   {
+      cout << "Fehler mit cur_idx" << endl;
+      print();
+      cout << "idx=" << idx << endl << endl;
+   }
+   if (_q[cur_idx+1].second >= _q[cur_idx].second)
+   {
+//       print();
+//       cout << endl;
+      return;
+   }
+
+   long int compare_value = _q[cur_idx].second;
+   size_t write = cur_idx+1;
+   size_t read = cur_idx+2;
+
+   while (read < _length)
+   {
+      if (_q[read].second > compare_value)
+      {
+         _q[write].first = _q[read].first;
+         _q[write].second = _q[read].second;
+         write++;
+         read++;
+      }
+      else
+      {
+         read++;
+      }
+   }
+   _length = write;
+//    print();
+//    cout << endl;
+}
+
+
+void Queue::print()
+{
+   cout << "Q " << _length << "/" << _q.size() << ": ";
+   for (size_t i = 0; i<_q.size(); i++)
+   {
+      cout << "(" << _q[i].first << "," << _q[i].second << ") ";
+   }
+   cout << endl;
+}
+
+
+
+
 void Instance::read_file(const char* filename)
 {
    fstream file(filename);             // open file
@@ -63,7 +223,7 @@ void Instance::minimum_perimeter()
    vector<size_t>                  old_sigma;
    vector<pair<x_coord, y_coord> > placement;          //Coordinates of the cells in a placement
    vector<pair<x_coord, y_coord> > best_placement;     //Coordinates of current best placement
-   map<size_t, long int>           Q;                  //Priority queue needed for the placement alg.
+   Queue Q(_num_cells);                                  //Priority queue needed for the placement alg.
    long int best_perimeter = INT_MAX;                  //Current best perimeter of placement;
    long int lower_bound_perimeter = 0;
 
@@ -165,7 +325,7 @@ bool Instance::find_perimeter_for_all_permutations(vector<size_t> & pi,
                                                    long int & best_perimeter,
                                                    long int & lower_bound_perimeter,
                                                    size_t k,
-                                                   map<size_t, long int> & Q,
+                                                   Queue & Q,
                                                    size_t idx,
                                                    bool pi_or_sigma)
 {
@@ -291,69 +451,45 @@ bool Instance::placement_for_pi_sigma(vector<size_t> const & pi,
                                       long int & best_perimeter,
                                       long int & lower_bound_perimeter,
                                       size_t k,
-                                      map<size_t, long int> & Q)
+                                      Queue & Q)
 {
    //Find x-coordinates
    long int total_width(0);
-   Q.clear();
-   Q[0] = 0;
-   Q[k + 1] = INT_MAX;
+   Q.reset();
 
    for (size_t i = 0; i < k; i++)
    {
       size_t c = pi[i];
       size_t p = sigma_inverse[c];
-      long int l_p;
-
-      map<size_t, long int>::iterator it;
-      it = Q.upper_bound(p+1);
-      it--;
-      placement[c].first = (*it).second;
-      l_p = placement[c].first + _cells[c].width;
+      placement[c].first = Q.val_of_pred(p+1);
+      long int l_p = placement[c].first + _cells[c].width;
 
       total_width = max(total_width, l_p);
       if (total_width >= best_perimeter) return false;   //Total width is already too long.
 
-      Q[p+1] = l_p;
-
-      it = Q.upper_bound(p+1);
-      while ((*it).second <= l_p)
-      {
-         Q.erase(it);
-         it = Q.upper_bound(p+1);
-      }
+      Q.set_value(p+1, l_p);
+      Q.delete_smaller_succ(p+1);
    }
 
 
    //Find y-coordinates
    long int total_height(0);
-   Q.clear();
-   Q[0] = 0;
-   Q[k + 1] = INT_MAX;
+   Q.reset();
+
    for (size_t i = k; i > 0;)
    {
       i--;
       size_t c = sigma[i];
       size_t p = pi_inverse[c];
-      long int l_p;
 
-      map<size_t, long int>::iterator it;
-      it = Q.upper_bound(p+1);
-      it--;
-      placement[c].second = (*it).second;
-      l_p = placement[c].second + _cells[c].height;
+      placement[c].second = Q.val_of_pred(p+1);
+      long int l_p = placement[c].second + _cells[c].height;
 
       total_height = max(total_height, l_p);
       if (total_height + total_width >= best_perimeter) return false;
 
-      Q[p+1] = l_p;
-
-      it = Q.upper_bound(p+1);
-      while ((*it).second <= l_p)
-      {
-         Q.erase(it);
-         it = Q.upper_bound(p+1);
-      }
+      Q.set_value(p+1, l_p);
+      Q.delete_smaller_succ(p+1);
    }
 
 
@@ -382,8 +518,7 @@ bool Instance::find_placement_one_free_cell(vector< size_t > const & pi_old,
                                             long int& best_perimeter,
                                             long int& lower_bound_perimeter,
                                             size_t k,
-                                            std::map< size_t,
-                                            long int >& Q)
+                                            Queue & Q)
 {
    if (k <= 1) return false;
 
@@ -423,16 +558,6 @@ bool Instance::find_placement_one_free_cell(vector< size_t > const & pi_old,
          {
             sigma_inverse[sigma[t]] = t;
          }
-
-//          cout << "pi old: ";
-//          for (size_t t = 0; t < k-1; t++) cout << pi_old[t] << " ";
-//          cout << endl << "pi new: ";
-//          for (size_t t = 0; t < k; t++) cout << pi[t] << " ";
-//          cout << endl << "sigma old: ";
-//          for (size_t t = 0; t < k-1; t++) cout << sigma_old[t] << " ";
-//          cout << endl << "sigma new: ";
-//          for (size_t t = 0; t < k; t++) cout << sigma[t] << " ";
-//          cout << endl << endl;
 
          found_optimum = placement_for_pi_sigma(pi,
                                                 pi_inverse,

@@ -1,10 +1,10 @@
 #ifndef INSTANCE_H
 #define INSTANCE_H
-#include <map>
-
 
 typedef long int x_coord;
 typedef long int y_coord;
+
+class Queue;
 
 class Cell
 {
@@ -56,7 +56,7 @@ private:
                                             long int & best_perimeter,
                                             long int & lower_bound_perimeter,
                                             size_t k,
-                                            std::map<size_t, long int> & Q,
+                                            Queue & Q,
                                             size_t idx,
                                             bool pi_or_sigma);
 
@@ -76,7 +76,7 @@ private:
                                long int & best_perimeter,
                                long int & lower_bound_perimeter,
                                size_t k,
-                               std::map<size_t, long int> & Q);
+                               Queue & Q);
 
    /**Finds an optimal placement using all permutations which arise from using
     * pi and sigma, and inserting the value k at all possible positions.
@@ -92,7 +92,7 @@ private:
                                      long int & best_perimeter,
                                      long int & lower_bound_perimeter,
                                      size_t k,
-                                     std::map<size_t, long int> & Q);
+                                     Queue & Q);
 
 
 
