@@ -85,8 +85,6 @@ void Instance::minimum_perimeter()
    placement.resize(_num_cells);
    best_placement.resize(_num_cells);
 
-
-
    for (size_t k = 1; k <= _num_cells; k++)
    {
       //At the beginning, all indices of pi and sigma are uninitialized.
