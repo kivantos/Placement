@@ -9,6 +9,8 @@
 
 using namespace std;
 
+
+
 /**This class is used as a priority queue.
  * All elements of the queue have a key and a value.
  * They are sorted by their key.
@@ -17,6 +19,8 @@ using namespace std;
  * 0 and n+1, where n is the number of cells to place in the algorithm.
  * The values are 0 respectively INT_MAX.
  * All other elements will have keys inbetween 0 and n+1.
+ * Note that the cell with index i will always have the key i+1.
+ * Hereby the indices of the cells are 0,1,...,n-1.
  *
  * Remark: We are aware of the fact that the current implementation
  * may not satisfy the theoretical runtime. However, in practice
@@ -67,22 +71,22 @@ Queue::Queue(unsigned int size)
    _length = 2;
 }
 
-void Queue::set_value(size_t idx, long int value)
+void Queue::set_value(size_t key, long int value)
 {
 //    cout << "Set value" << endl;
 //    print();
-   size_t cur_idx = 1;
-   while (_q[cur_idx].first < idx)
+   size_t cur_key = 1;
+   while (_q[cur_key].first < key)
    {
-      cur_idx++;
+      cur_key++;
    }
-   for (size_t i = _length; i > cur_idx; i--)
+   for (size_t i = _length; i > cur_key; i--)
    {
       _q[i].first = _q[i-1].first;
       _q[i].second = _q[i-1].second;
    }
-   _q[cur_idx].first = idx;
-   _q[cur_idx].second = value;
+   _q[cur_key].first = key;
+   _q[cur_key].second = value;
    _length += 1;
 //    print();
 //    cout << endl;
@@ -98,43 +102,43 @@ void Queue::reset()
 }
 
 
-long int Queue::val_of_pred(size_t idx)
+long int Queue::val_of_pred(size_t key)
 {
-   size_t cur_idx = 1;
-   while (_q[cur_idx].first < idx)
+   size_t cur_key = 1;
+   while (_q[cur_key].first < key)
    {
-      cur_idx++;
+      cur_key++;
    }
-   return _q[cur_idx-1].second;
+   return _q[cur_key-1].second;
 }
 
-void Queue::delete_smaller_succ(size_t idx)
+void Queue::delete_smaller_succ(size_t key)
 {
-   size_t cur_idx = 1;
-   while (_q[cur_idx].first < idx)
+   size_t cur_key = 1;
+   while (_q[cur_key].first < key)
    {
-      cur_idx++;
+      cur_key++;
    }
-   if (_q[cur_idx].first != idx)
+   if (_q[cur_key].first != key)
    {
       cout << "FEHLER::::::" << endl;
    }
-   if (cur_idx >= _length-1)
+   if (cur_key >= _length-1)
    {
-      cout << "Fehler mit cur_idx" << endl;
+      cout << "Fehler mit cur_key" << endl;
       print();
-      cout << "idx=" << idx << endl << endl;
+      cout << "key=" << key << endl << endl;
    }
-   if (_q[cur_idx+1].second >= _q[cur_idx].second)
+   if (_q[cur_key+1].second >= _q[cur_key].second)
    {
 //       print();
 //       cout << endl;
       return;
    }
 
-   long int compare_value = _q[cur_idx].second;
-   size_t write = cur_idx+1;
-   size_t read = cur_idx+2;
+   long int compare_value = _q[cur_key].second;
+   size_t write = cur_key+1;
+   size_t read = cur_key+2;
 
    while (read < _length)
    {
