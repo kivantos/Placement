@@ -31,5 +31,4 @@ int main(int argc, char **argv)
    Inst.minimum_perimeter();
 
    return 0;
->>>>>>> 6a1708a72c7d7b6a1571bec5e7c301d179bab200
 }
