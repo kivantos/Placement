@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <climits>
+#include <sstream>
 
 #include "instance.h"
 #include "plotter.h"
@@ -302,6 +303,22 @@ void Instance::minimum_perimeter()
       }
 
       cout << "...done. Lower bound improved to " << lower_bound_perimeter << endl;
+
+      string plot_filename;
+      if (k==0) plot_filename = "placement_0.eps";
+      else if (k==1) plot_filename = "placement_1.eps";
+      else if (k==2) plot_filename = "placement_2.eps";
+      else if (k==3) plot_filename = "placement_3.eps";
+      else if (k==4) plot_filename = "placement_4.eps";
+      else if (k==5) plot_filename = "placement_5.eps";
+      else if (k==6) plot_filename = "placement_6.eps";
+      else if (k==7) plot_filename = "placement_7.eps";
+      else if (k==8) plot_filename = "placement_8.eps";
+      else if (k==9) plot_filename = "placement_9.eps";
+      else plot_filename = "placement_last.eps";
+
+      plot_placement(best_placement, plot_filename, k);
+
    }
 
    //Output
@@ -314,25 +331,25 @@ void Instance::minimum_perimeter()
       << ", " << best_placement[i].second << ")" << endl;
    }
 
-   plot_placement(best_placement);
+   plot_placement(best_placement, "placement_final.eps", best_placement.size());
 }
 
 void
-Instance::plot_placement(std::vector< std::pair< x_coord, y_coord > > const & placement)
+Instance::plot_placement(std::vector< std::pair< x_coord, y_coord > > const & placement,
+                         string filename_string,
+                         size_t size)
 {
+   const char *filename = filename_string.c_str();
    long int x_min = 0;
    long int x_max = 0;
    long int y_min = 0;
    long int y_max = 0;
 
-   for (size_t i = 0; i < placement.size(); i++)
+   for (size_t i = 0; i < size; i++)
    {
       x_max = max(x_max, placement[i].first + _cells[i].width);
       y_max = max(y_max, placement[i].second + _cells[i].height);
    }
-
-   const char *filename;
-   filename = "placement.eps";
 
    PLOTTER plot;
    plot.initialize(filename,
@@ -349,7 +366,7 @@ Instance::plot_placement(std::vector< std::pair< x_coord, y_coord > > const & pl
 
    string color;
 
-   for (size_t i = 0; i < placement.size(); i++)
+   for (size_t i = 0; i < size; i++)
    {
       if (i==0) color = "blue";
       else if (i==1) color = "red";

@@ -97,7 +97,9 @@ private:
 
    /**Plots the placement to the file "placement.eps" in the build folder.
     **/
-   void plot_placement(std::vector<std::pair<x_coord, y_coord> > const & placement);
+   void plot_placement(std::vector<std::pair<x_coord, y_coord> > const & placement,
+                       std::string filename,
+                       size_t size);
 
 
 
