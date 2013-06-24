@@ -5,6 +5,7 @@
 #include <climits>
 
 #include "instance.h"
+#include "plotter.h"
 
 using namespace std;
 
@@ -312,7 +313,64 @@ void Instance::minimum_perimeter()
       cout << "Circuit " << i << ": (" << best_placement[i].first
       << ", " << best_placement[i].second << ")" << endl;
    }
+
+   plot_placement(best_placement);
 }
+
+void
+Instance::plot_placement(std::vector< std::pair< x_coord, y_coord > > const & placement)
+{
+   long int x_min = 0;
+   long int x_max = 0;
+   long int y_min = 0;
+   long int y_max = 0;
+
+   for (size_t i = 0; i < placement.size(); i++)
+   {
+      x_max = max(x_max, placement[i].first + _cells[i].width);
+      y_max = max(y_max, placement[i].second + _cells[i].height);
+   }
+
+   const char *filename;
+   filename = "placement.eps";
+
+   PLOTTER plot;
+   plot.initialize(filename,
+                   (double) x_min,
+                   (double) y_min,
+                   (double) x_max,
+                   (double) y_max);
+
+   plot.rectangle_empty((double) x_min,
+                        (double) y_min,
+                        (double) x_max,
+                        (double) y_max,
+                        "black");
+
+   string color;
+
+   for (size_t i = 0; i < placement.size(); i++)
+   {
+      if (i==0) color = "blue";
+      else if (i==1) color = "red";
+      else if (i==2) color = "yellow";
+      else if (i==3) color = "forrestgreen";
+      else if (i==4) color = "orange";
+      else if (i==5) color = "violet";
+      else if (i==6) color = "magenta";
+      else if (i==7) color = "pink";
+      else if (i==8) color = "brown";
+      else if (i==9) color = "grey";
+      else if (i==10) color = "black";
+
+      plot.rectangle((double) placement[i].first,
+                     (double) placement[i].second,
+                     (double) (placement[i].first + _cells[i].width),
+                     (double) placement[i].second + _cells[i].height,
+                     color);
+   }
+}
+
 
 
 bool Instance::find_perimeter_for_all_permutations(vector<size_t> & pi,
