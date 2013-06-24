@@ -11,7 +11,7 @@ using namespace std;
 
 void Instance::read_file(const char* filename)
 {
-   fstream file(filename);             // open file
+   fstream file(filename);
    if (! file)
    {
          cerr << "Could not open file";
