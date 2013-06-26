@@ -74,8 +74,6 @@ Queue::Queue(unsigned int size)
 
 void Queue::set_value(size_t key, long int value)
 {
-//    cout << "Set value" << endl;
-//    print();
    size_t cur_key = 1;
    while (_q[cur_key].first < key)
    {
@@ -89,8 +87,6 @@ void Queue::set_value(size_t key, long int value)
    _q[cur_key].first = key;
    _q[cur_key].second = value;
    _length += 1;
-//    print();
-//    cout << endl;
 }
 
 void Queue::reset()
@@ -132,8 +128,6 @@ void Queue::delete_smaller_succ(size_t key)
    }
    if (_q[cur_key+1].second >= _q[cur_key].second)
    {
-//       print();
-//       cout << endl;
       return;
    }
 
@@ -156,8 +150,6 @@ void Queue::delete_smaller_succ(size_t key)
       }
    }
    _length = write;
-//    print();
-//    cout << endl;
 }
 
 
@@ -178,6 +170,8 @@ void Instance::read_file(const char* filename)
 {
    vector<Cell> cells_puffer;
    _cells.clear();
+
+   _logfile.open("logfile.txt", ios::out|ios::trunc);
 
    fstream file(filename);             // open file
    if (! file)
@@ -298,7 +292,7 @@ void Instance::minimum_perimeter()
       }
       best_perimeter = INT_MAX;
 
-      cout << "Calculate for k=" << k << "..." << endl;
+      _logfile << "Calculate for k=" << k << "..." << endl;
 
       bool success;
       success = find_placement_one_free_cell(old_pi,
@@ -335,10 +329,10 @@ void Instance::minimum_perimeter()
       }
       else
       {
-         cout << "Could use old placement to insert one new cell!" << endl;
+         _logfile << "Could use old placement to insert one new cell!" << endl;
       }
 
-      cout << "...done. Lower bound improved to " << lower_bound_perimeter << endl;
+      _logfile << "...done. Lower bound improved to " << lower_bound_perimeter << endl;
 
       string plot_filename;
       if (k==0) plot_filename = "placement_0.eps";
@@ -351,21 +345,15 @@ void Instance::minimum_perimeter()
       else if (k==7) plot_filename = "placement_7.eps";
       else if (k==8) plot_filename = "placement_8.eps";
       else if (k==9) plot_filename = "placement_9.eps";
+      else if (k==10) plot_filename = "placement_10.eps";
+      else if (k==11) plot_filename = "placement_11.eps";
       else plot_filename = "placement_last.eps";
 
       plot_placement(best_placement, plot_filename, k);
 
    }
 
-   //Output
-   //TODO: Correct format.
-   cout << endl << "BBX=" << best_perimeter << endl;
-   cout << "Placement:" << endl;
-   for (size_t i = 0; i < _num_cells; i++)
-   {
-      cout << "Circuit " << i << ": (" << best_placement[i].first
-      << ", " << best_placement[i].second << ")" << endl;
-   }
+   output(best_placement);
 
    plot_placement(best_placement, "placement_final.eps", best_placement.size());
 }
@@ -693,12 +681,43 @@ bool Instance::find_placement_one_free_cell(vector< size_t > const & pi_old,
 }
 
 
+void Instance::output(const std::vector< std::pair< x_coord, y_coord > >& placement)
+{
+   long int width = 0;
+   long int height = 0;
+   for (size_t i = 0; i < _num_cells; i++)
+   {
+      width = max(width, placement[i].first + _cells[i].width);
+      height = max(height, placement[i].second + _cells[i].height);
+   }
+
+   _logfile << endl << "BBX=" << width << " * " << height << endl
+   << "Perimeter = " << width+height << endl;
+   _logfile << "Placement:" << endl;
+   cout << width << " " << height << endl;
+
+   for (size_t i = 0; i < _num_cells; i++)
+   {
+      for (size_t j = 0; j < _num_cells; j++)
+      {
+         if (_cells[j].idx == i)
+         {
+            _logfile << "Circuit " << i << ": (" << placement[j].first
+            << ", " << placement[j].second << ")" << endl;
+            cout << placement[j].first << " " << placement[j].second << endl;
+            j = _num_cells;
+         }
+      }
+   }
+}
+
+
 void Instance::print()
 {
-   cout << "INSTANCE: (" << _num_cells << " cells)" << endl;
+   _logfile << "INSTANCE: (" << _num_cells << " cells)" << endl;
    for (size_t i=0; i<_cells.size(); i++)
    {
-      cout << "Cell " << i << ": " << _cells[i].width << " " << _cells[i].height << endl;
+      _logfile << "Cell " << i << ": " << _cells[i].width << " " << _cells[i].height << endl;
    }
-   cout << endl;
+   _logfile << endl;
 }

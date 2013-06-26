@@ -1,6 +1,8 @@
 #ifndef INSTANCE_H
 #define INSTANCE_H
 
+#include <fstream>
+
 typedef long int x_coord;
 typedef long int y_coord;
 
@@ -97,6 +99,10 @@ private:
                                      size_t k,
                                      Queue & Q);
 
+   /**Output the placement
+    **/
+   void output(std::vector<std::pair<x_coord, y_coord> > const & placement);
+
    /**Plots the placement to the file "placement.eps" in the build folder.
     **/
    void plot_placement(std::vector<std::pair<x_coord, y_coord> > const & placement,
@@ -108,6 +114,8 @@ private:
    unsigned int      _num_cells;        //Dimension
    long int          _total_cell_size;  //Sum of all cell sizes.
    std::vector<Cell> _cells;
+
+   std::ofstream _logfile;
 };
 
 #endif
