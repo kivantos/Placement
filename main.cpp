@@ -7,6 +7,7 @@
  * a placement minimizing the bounding box length.
  * The placement is written to the standard output.
  *
+ * Blala von Christoph.
  **/
 
 #include <iostream>
