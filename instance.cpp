@@ -230,7 +230,7 @@ void Instance::read_file(const char* filename)
          {
             if (cells_puffer[i].height > highest_value)
             {
-               highest_value = cells_puffer[i].width;
+               highest_value = cells_puffer[i].height;
                best_idx = i;
             }
          }
