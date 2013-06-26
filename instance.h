@@ -11,6 +11,8 @@ class Cell
 public:
    long int height;
    long int width;
+
+   size_t idx;
 };
 
 

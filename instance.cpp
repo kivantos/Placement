@@ -176,6 +176,9 @@ void Queue::print()
 
 void Instance::read_file(const char* filename)
 {
+   vector<Cell> cells_puffer;
+   _cells.clear();
+
    fstream file(filename);             // open file
    if (! file)
    {
@@ -188,7 +191,6 @@ void Instance::read_file(const char* filename)
    getline(file, line);                // get first line of file
    stringstream ss(line);              // convert line to a stringstream
    ss >> _num_cells;                   // for which we can use << as with cin
-   _cells.clear();
 
    while (getline(file, line))
    {
@@ -201,15 +203,49 @@ void Instance::read_file(const char* filename)
                return;
          }
          ss >> c.height;
-         _cells.push_back(c);
+         cells_puffer.push_back(c);
+         cells_puffer[cells_puffer.size()-1].idx = cells_puffer.size()-1;
          _total_cell_size += c.width * c.height;
    }
 
-   if (_cells.size() != _num_cells)
+   if (cells_puffer.size() != _num_cells)
    {
       cerr << "Invalid file format: _num_cells=" << _num_cells << ", vector has "
-      << _cells.size() << " elements." << endl;
+      << cells_puffer.size() << " elements." << endl;
       return;
+   }
+
+   bool find_longest = true;
+   size_t best_idx;
+   long int highest_value;
+
+   while (!cells_puffer.empty())
+   {
+      highest_value = 0;
+      for (size_t i = 0; i < cells_puffer.size(); i++)
+      {
+         if (find_longest)
+         {
+            if (cells_puffer[i].width > highest_value)
+            {
+               highest_value = cells_puffer[i].width;
+               best_idx = i;
+            }
+         }
+         else
+         {
+            if (cells_puffer[i].height > highest_value)
+            {
+               highest_value = cells_puffer[i].width;
+               best_idx = i;
+            }
+         }
+      }
+      _cells.push_back(cells_puffer[best_idx]);
+      cells_puffer[best_idx] = cells_puffer[cells_puffer.size()-1];
+      cells_puffer.pop_back();
+
+      find_longest = find_longest ? false : true;
    }
 }
 
