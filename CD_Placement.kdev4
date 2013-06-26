@@ -1,0 +1,4 @@
+[Project]
+Name=CD_Placement
+Manager=KDevCMakeManager
+VersionControl=kdevgit
