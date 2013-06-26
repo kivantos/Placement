@@ -210,7 +210,7 @@ void Instance::read_file(const char* filename)
    }
 
    bool find_longest = true;
-   size_t best_idx;
+   size_t best_idx = 0;
    long int highest_value;
 
    while (!cells_puffer.empty())
