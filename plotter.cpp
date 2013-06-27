@@ -63,7 +63,7 @@ PLOTTER::write_file_head()
 
    //cout << "Writing file head..." << endl;
 
-   _file << "% Created by " << endl// << _author << endl
+   _file << "% Created by Christoph Hunkenschröder and Rasmus Schroeder" << endl
    << "% Date: " << endl << endl
 
    << "/VLine{dup 0 moveto Height lineto} def" << endl

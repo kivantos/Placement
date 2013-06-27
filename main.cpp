@@ -6,6 +6,7 @@
  * The programme calculates for a given list of cells with widths and heights
  * a placement minimizing the bounding box length.
  * The placement is written to the standard output.
+ * Tha placement is drawn to "placement.eps".
  *
  **/
 

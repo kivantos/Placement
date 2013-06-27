@@ -213,6 +213,9 @@ void Instance::read_file(const char* filename)
    size_t best_idx = 0;
    long int highest_value;
 
+   //Sort the cells s.t. the widest comes first, then the heighest from the remaining,
+   //and then the widest from the remaining and so on.
+   //This is due to faster increasement of the lower bound in the fct. "minimum_perimeter".
    while (!cells_puffer.empty())
    {
       highest_value = 0;
@@ -258,8 +261,15 @@ void Instance::minimum_perimeter()
    vector<size_t>                  old_sigma;
    vector<pair<x_coord, y_coord> > placement;          //Coordinates of the cells in a placement
    vector<pair<x_coord, y_coord> > best_placement;     //Coordinates of current best placement
-   Queue Q(_num_cells);                                  //Priority queue needed for the placement alg.
-   long int best_perimeter = INT_MAX;                  //Current best perimeter of placement;
+   Queue Q(_num_cells);                                //Priority queue needed for the placement alg.
+
+   //For every k (see for-loop) the perimeter of the current best placement is
+   //stored in best_placement. Every new calculation can be stopped when this
+   //upper bound is exceeded.
+   long int best_perimeter = INT_MAX;
+
+   //This value is a lower bound for the perimeter for the overall algorithm.
+   //It can be increased when the first k cells are placed optimal.
    long int lower_bound_perimeter = 0;
 
 
@@ -281,6 +291,8 @@ void Instance::minimum_perimeter()
    best_placement.resize(_num_cells);
 
    for (size_t k = 1; k <= _num_cells; k++)
+   //Only place the first k cells to improve the lower bound.
+   //Note: The cells are "somehow sorted by size" (see fct. read_file)
    {
       //At the beginning, all indices of pi and sigma are uninitialized.
       for (size_t i = 0; i<k; i++)
@@ -294,19 +306,24 @@ void Instance::minimum_perimeter()
 
       _logfile << "Calculate for k=" << k << "..." << endl;
 
-      bool success;
-      success = find_placement_one_free_cell(old_pi,
-                                             best_pi,
-                                             old_sigma,
-                                             best_sigma,
-                                             placement,
-                                             best_placement,
-                                             best_perimeter,
-                                             lower_bound_perimeter,
-                                             k,
-                                             Q);
+      //Use the permutations from the best placement of the first k-1 cells
+      //and insert the kth index for the permutations at all possible
+      //positions in the old permutations.
+      //This is a heuristic to find good placements first (to improve the upper bound).
+      bool success = find_placement_one_free_cell(old_pi,
+                                                   best_pi,
+                                                   old_sigma,
+                                                   best_sigma,
+                                                   placement,
+                                                   best_placement,
+                                                   best_perimeter,
+                                                   lower_bound_perimeter,
+                                                   k,
+                                                   Q);
 
       if (!success)
+      //Did not find an optimal placement for the first k cells using the above heuristic.
+      //Calculate all possible permutations.
       {
          find_perimeter_for_all_permutations(pi,
                                              pi_inverse,
@@ -325,6 +342,7 @@ void Instance::minimum_perimeter()
                                              k,  //Index to be fixed first.
                                              true);
 
+         //Increase the lower bound.
          lower_bound_perimeter = best_perimeter;
       }
       else
@@ -334,28 +352,30 @@ void Instance::minimum_perimeter()
 
       _logfile << "...done. Lower bound improved to " << lower_bound_perimeter << endl;
 
-      string plot_filename;
-      if (k==0) plot_filename = "placement_0.eps";
-      else if (k==1) plot_filename = "placement_1.eps";
-      else if (k==2) plot_filename = "placement_2.eps";
-      else if (k==3) plot_filename = "placement_3.eps";
-      else if (k==4) plot_filename = "placement_4.eps";
-      else if (k==5) plot_filename = "placement_5.eps";
-      else if (k==6) plot_filename = "placement_6.eps";
-      else if (k==7) plot_filename = "placement_7.eps";
-      else if (k==8) plot_filename = "placement_8.eps";
-      else if (k==9) plot_filename = "placement_9.eps";
-      else if (k==10) plot_filename = "placement_10.eps";
-      else if (k==11) plot_filename = "placement_11.eps";
-      else plot_filename = "placement_last.eps";
-
-      plot_placement(best_placement, plot_filename, k);
+//       Draw intermediate placements
+//
+//       string plot_filename;
+//       if (k==0) plot_filename = "placement_0.eps";
+//       else if (k==1) plot_filename = "placement_1.eps";
+//       else if (k==2) plot_filename = "placement_2.eps";
+//       else if (k==3) plot_filename = "placement_3.eps";
+//       else if (k==4) plot_filename = "placement_4.eps";
+//       else if (k==5) plot_filename = "placement_5.eps";
+//       else if (k==6) plot_filename = "placement_6.eps";
+//       else if (k==7) plot_filename = "placement_7.eps";
+//       else if (k==8) plot_filename = "placement_8.eps";
+//       else if (k==9) plot_filename = "placement_9.eps";
+//       else if (k==10) plot_filename = "placement_10.eps";
+//       else if (k==11) plot_filename = "placement_11.eps";
+//       else plot_filename = "placement_last.eps";
+//
+//       plot_placement(best_placement, plot_filename, k);
 
    }
 
    output(best_placement);
 
-   plot_placement(best_placement, "placement_final.eps", best_placement.size());
+   plot_placement(best_placement, "placement.eps", best_placement.size());
 }
 
 void
@@ -617,8 +637,8 @@ bool Instance::find_placement_one_free_cell(vector< size_t > const & pi_old,
                                             vector< size_t > & best_sigma,
                                             vector< pair< x_coord, y_coord > >& placement,
                                             vector< pair< x_coord, y_coord > >& best_placement,
-                                            long int& best_perimeter,
-                                            long int& lower_bound_perimeter,
+                                            long int & best_perimeter,
+                                            long int & lower_bound_perimeter,
                                             size_t k,
                                             Queue & Q)
 {
